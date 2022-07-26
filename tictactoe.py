@@ -9,6 +9,7 @@ class Board:  # Main game
         Initializes a 'dim' by 'dim' board
         Uses generators to initialize spots on virtual board.
         """
+
         # self.playernumber = playernumber, True
         self.dim = dim
         self.board = [[" "] * dim for _ in range(dim)]
@@ -101,6 +102,7 @@ class Board:  # Main game
         Main game loop, runs until winner returns True,
         runs user inputs through wincheck and legality functions
         """
+
         playernumber = (True, "1")
         usercoords = [self.dim, self.dim]
         turn = 0
@@ -122,6 +124,9 @@ class Board:  # Main game
 
 
 def main():
+    """
+    Runs game code
+    """
     global Quarto
     Quarto = Board(4)
     # TTT = Board(3)
