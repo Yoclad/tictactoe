@@ -4,18 +4,28 @@
 
 class Piece:
 
-    def __init__(piece, light, big, hole, square):
+    def __init__(piece):
         """
         Initializes each piece's dimensions
         as boolean values. Between color, height,
         having a hole, and shape.
         """
 
-        piece.light = light  # Booleans since each only has 2 states
-        piece.big = big
-        piece.hole = hole
-        piece.square = square
+        piece.color = color  # Booleans since each only has 2 states
+        piece.size = size
+        piece.hallow = hallow
+        piece.shape = shape
         piece.player = player
+
+    @staticmethod
+    def pieces(size, color, shape, hallow):
+        piece_attributes = [size, color, shape, hallow]
+        for attribute in piece_attributes:
+            if attribute == 1:
+                attribute = False
+            else:
+                attribute = True
+        return piece_attributes
 
     def moves_made(piece, received, gave):
         """
@@ -79,18 +89,24 @@ class Board:  # Main game
         # Checks if full row of same token has been played using set length of row
         for i in range(self.dim):
             rowlist = self.board[i]  # Creates row element
-            if len(set(rowlist)) == 1 and " " not in rowlist:  # Checks to see if all values are the same token
-                return True
+            token_attribute_list = [token for token in rowlist]
+            if " " in rowlist:  # Checks to see if all values are the same token
+                return False
             columnlist = [self.board[j][i] for j in range(self.dim)]
-            if len(set(columnlist)) == 1 and " " not in columnlist:
-                return True
+            if " " in columnlist:
+                return False
             Mdiagonallist.append(self.board[i][i])
             mdiagonallist.append(self.board[i][(self.dim - 1) - i])
-        if (len(set(Mdiagonallist)) == 1 and " " not in Mdiagonallist) or (
-                len(set(mdiagonallist)) == 1 and " " not in mdiagonallist):
-            return True
+            if (" " in Mdiagonallist) or (" " in mdiagonallist):
+                return False
+            shared_attributes = []
+            for n, j in zip(token_attribute_list, test_list2):
+                if n == j:
+                    shared_attributes.append(n)
+            if len(set(shared_attributes)) == 4:
+                return True
 
-    def winner(self, turns, player=None):
+    def winner(self, turns=None, player=None):
         """
         Checks match conditions, if a winner arises
         ends match loop and announces victory
@@ -132,29 +148,24 @@ class Board:  # Main game
         usercoords = [self.dim, self.dim]
         turn = 0
         playernum = 1
-        token = ["x", Piece.light, Piece.big, Piece.hole, Piece.square]
-        piece_attributes = []
+        token = ["x"]
         while not (self.winner()):  # Main game loop
-            usercoords[0] = int(input("Player " + playernum + " Enter Y coordinate: "))
-            usercoords[1] = int(input("Player " + playernum + " Enter X coordinate: "))  # Main inputs
+            usercoords[0] = int(input("Player " + str(playernum) + " Enter Y coordinate: "))
+            usercoords[1] = int(input("Player " + str(playernum) + " Enter X coordinate: "))  # Main inputs
             size = int(input("Enter 1 for light: "))
             color = int(input("Enter 1 for big: "))
             shape = int(input("Enter 1 for hole: "))
             hallow = int(input("Enter 1 for square: "))
-            piece_attributes.extend([size, color, shape, hallow])
-            idx = 1
-            for attribute in piece_attributes:
-                if attribute != 1:
-                    token[idx] = False
-                idx += 1
+            Piece.pieces(size, color, shape, hallow)
+
             if not self.legality(usercoords, self.spots):  # If move illegal, turn not counted and player is helped
                 print("Your input was invalid, available coords are: " + str(self.spots))
             else:
                 if turn % 2 == 0:
-                    token[0] = "x"
+                    token[0] = "x{}".format(str(turn))
                 else:
-                    token[0] = "o"
-                self.updateboard(token, usercoords, spots=self.spots)
+                    token[0] = "o{}".format(str(turn))
+                self.updateboard(token[0], usercoords, spots=self.spots)
             turn += 1  # Progress
             playernum = str((turn % 2) + 1)  # Changes active player number
             print(Quarto)
