@@ -1,6 +1,6 @@
 # Stephan McGlashan
 # CS3 tictactoe/quarto
-# TODO: imp moves_made, recon group cons, clean win out
+# TODO: recon group cons, clean win out
 
 class Piece:
 
@@ -11,10 +11,10 @@ class Piece:
         having a hole, and shape.
         """
 
-        piece.light = light, True  # Booleans since each only has 2 states
-        piece.big = big, True
-        piece.hole = hole, True
-        piece.square = square, True
+        piece.light = light  # Booleans since each only has 2 states
+        piece.big = big
+        piece.hole = hole
+        piece.square = square
         piece.player = player
 
     def moves_made(piece, received, gave):
@@ -132,9 +132,21 @@ class Board:  # Main game
         usercoords = [self.dim, self.dim]
         turn = 0
         playernum = 1
+        token = ["x", Piece.light, Piece.big, Piece.hole, Piece.square]
+        piece_attributes = []
         while not (self.winner()):  # Main game loop
             usercoords[0] = int(input("Player " + playernum + " Enter Y coordinate: "))
             usercoords[1] = int(input("Player " + playernum + " Enter X coordinate: "))  # Main inputs
+            size = int(input("Enter 1 for light: "))
+            color = int(input("Enter 1 for big: "))
+            shape = int(input("Enter 1 for hole: "))
+            hallow = int(input("Enter 1 for square: "))
+            piece_attributes.extend([size, color, shape, hallow])
+            idx = 1
+            for attribute in piece_attributes:
+                if attribute != 1:
+                    token[idx] = False
+                idx += 1
             if not self.legality(usercoords, self.spots):  # If move illegal, turn not counted and player is helped
                 print("Your input was invalid, available coords are: " + str(self.spots))
             else:
