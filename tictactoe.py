@@ -1,6 +1,6 @@
 # Stephan McGlashan
 # CS3 tictactoe/quarto
-# TODO: imp moves_made, recon win cons, clean win out
+# TODO: imp moves_made, recon group cons, clean win out
 
 class Piece:
 
@@ -11,10 +11,10 @@ class Piece:
         having a hole, and shape.
         """
 
-        piece.light = light  # Booleans since each only has 2 states
-        piece.big = big
-        piece.hole = hole
-        piece.square = square
+        piece.light = light, True  # Booleans since each only has 2 states
+        piece.big = big, True
+        piece.hole = hole, True
+        piece.square = square, True
         piece.player = player
 
     def moves_made(piece, received, gave):
@@ -40,7 +40,6 @@ class Board:  # Main game
         Uses generators to initialize spots on virtual board.
         """
 
-        # self.playernumber = playernumber, True
         self.dim = dim
         self.board = [[" "] * dim for _ in range(dim)]
         self.spots = [[j, i] for i in range(dim) for j in range(dim)]  # Generates lists of possible spots on board
@@ -71,11 +70,11 @@ class Board:  # Main game
 
     def groupcheck(self):
         """
-        Checks to see if group of three exists in
+        Checks to see if group of four exists in
         row / column / diagonal
         """
 
-        Mdiagonallist = []  # Creating diagonal lists prior to appendage
+        Mdiagonallist = []  # Creating Major/minor diagonal lists prior to appendage
         mdiagonallist = []
         # Checks if full row of same token has been played using set length of row
         for i in range(self.dim):
@@ -91,27 +90,24 @@ class Board:  # Main game
                 len(set(mdiagonallist)) == 1 and " " not in mdiagonallist):
             return True
 
-    def winner(self, playernumber):
+    def winner(self, turns, player=None):
         """
         Checks match conditions, if a winner arises
         ends match loop and announces victory
         """
 
         if not self.groupcheck():  # Checks to see if a row / column / diagonal win condition has been met
-            return playernumber, False
+            return False
         else:
-            print("Congratulations! Player:", str(playernumber[1]), "has won!")
-            return playernumber, True  # Will end game loop
+            print("Congratulations! Player:", player, "has won over the course of", str(turns), "moves!\n")
+            print("The winner played: " + str(Piece.moves_made()[turns % 2]))
+            return True  # Will end game loop
 
-    def updateboard(self, playernumber, usercoords, spots):
+    def updateboard(self, token, usercoords, spots):
         """
-        Players token in correct spot
+        Places passed token, and its attributes, in
+        passed coordinates, will only update board with "x/o"
         """
-
-        if playernumber[0]:  # Uses boolean value in playernumber to determine turn
-            token = "x"
-        else:
-            token = "o"
         self.board[usercoords[0]][usercoords[1]] = token  # Places token in designated spot
         spots.remove(usercoords)  # Removes played spot from list of playable spots
 
@@ -133,24 +129,24 @@ class Board:  # Main game
         runs user inputs through wincheck and legality functions
         """
 
-        playernumber = (True, "1")
         usercoords = [self.dim, self.dim]
         turn = 0
-        while not (self.winner(playernumber)[1]):  # Main game loop
-            if turn % 2 == 0:
-                playernumber = (True, "1")  # Player 1 / "x" plays on even iterations
+        playernum = 1
+        while not (self.winner()):  # Main game loop
+            usercoords[0] = int(input("Player " + playernum + " Enter Y coordinate: "))
+            usercoords[1] = int(input("Player " + playernum + " Enter X coordinate: "))  # Main inputs
+            if not self.legality(usercoords, self.spots):  # If move illegal, turn not counted and player is helped
+                print("Your input was invalid, available coords are: " + str(self.spots))
             else:
-                playernumber = (False, "2")
-            usercoords[0] = int(input("Player " + playernumber[1] + " Enter Y coordinate: "))
-            usercoords[1] = int(input("Player " + playernumber[1] + " Enter X coordinate: "))  # Main inputs
-            if not self.legality(usercoords,
-                                 self.spots):  # If move played is illegal, turn is not counted and player is given help
-                print("Your input was invalid, idiot, available coords are " + str(self.spots))
-            else:
-                self.updateboard(playernumber, usercoords, spots=self.spots)
-                turn += 1  # Progress
+                if turn % 2 == 0:
+                    token[0] = "x"
+                else:
+                    token[0] = "o"
+                self.updateboard(token, usercoords, spots=self.spots)
+            turn += 1  # Progress
+            playernum = str((turn % 2) + 1)  # Changes active player number
             print(Quarto)
-        return self.winner(playernumber)
+        return self.winner(player=playernum)
 
 
 def main():
