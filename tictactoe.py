@@ -1,6 +1,6 @@
 # Stephan McGlashan
 # CS3 tictactoe/quarto
-# TODO: recon group cons, clean win out
+
 
 class Piece:
 
@@ -176,6 +176,7 @@ def main():
     """
     Runs game code
     """
+
     global Quarto
     Quarto = Board(4)
     # TTT = Board(3)
