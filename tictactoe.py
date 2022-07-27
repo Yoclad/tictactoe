@@ -1,5 +1,35 @@
 # Stephan McGlashan
 # CS3 tictactoe/quarto
+# TODO: imp moves_made, recon win cons, clean win out
+
+class Piece:
+
+    def __init__(piece, light, big, hole, square):
+        """
+        Initializes each piece's dimensions
+        as boolean values. Between color, height,
+        having a hole, and shape.
+        """
+
+        piece.light = light  # Booleans since each only has 2 states
+        piece.big = big
+        piece.hole = hole
+        piece.square = square
+        piece.player = player
+
+    def moves_made(piece, received, gave):
+        """
+        Counts passed type of pieces received
+        and given by first player. Pieces received and
+        given by player 1 effectively just models player 1's
+        pieces played and player 2's pieces played
+        respectively. Output will be displayed in endgame output.
+        """
+
+        piece.player = [[], []]
+        piece.player[0].append(received)  # Player 1's pieces
+        piece.player[1].append(gave)  # Player 2's pieces
+        return piece.player
 
 
 class Board:  # Main game
