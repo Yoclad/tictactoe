@@ -2,9 +2,9 @@
 # CS3 tictactoe/quarto
 
 
-class Piece:
+class Token:  # Piece attributes
 
-    def __init__(piece):
+    def __init__(piece, size, shape, color, hole):
         """
         Initializes each piece's dimensions
         as boolean values. Between color, height,
@@ -13,19 +13,8 @@ class Piece:
 
         piece.color = color  # Booleans since each only has 2 states
         piece.size = size
-        piece.hallow = hallow
+        piece.hole = hole
         piece.shape = shape
-        piece.player = player
-
-    @staticmethod
-    def pieces(size, color, shape, hallow):
-        piece_attributes = [size, color, shape, hallow]
-        for attribute in piece_attributes:
-            if attribute == 1:
-                attribute = False
-            else:
-                attribute = True
-        return piece_attributes
 
     def moves_made(piece, received, gave):
         """
@@ -80,35 +69,28 @@ class Board:  # Main game
 
     def groupcheck(self):
         """
-        Checks to see if group of four exists in
-        row / column / diagonal
+        Checks to see if four pieces exist in
+        row / column / diagonal to pass into 'winner'
+        to identify potential winner and end game loop.
         """
 
         Mdiagonallist = []  # Creating Major/minor diagonal lists prior to appendage
         mdiagonallist = []
-        # Checks if full row of same token has been played using set length of row
-        for i in range(self.dim):
-            rowlist = self.board[i]  # Creates row element
-            token_attribute_list = [token for token in rowlist]
-            if " " in rowlist:  # Checks to see if all values are the same token
-                return False
+        for i in range(self.dim):  # Creates board in list format to check contents
+            rowlist = self.board[i]
             columnlist = [self.board[j][i] for j in range(self.dim)]
-            if " " in columnlist:
-                return False
             Mdiagonallist.append(self.board[i][i])
             mdiagonallist.append(self.board[i][(self.dim - 1) - i])
-            if (" " in Mdiagonallist) or (" " in mdiagonallist):
-                return False
-            shared_attributes = []
-            for n, j in zip(token_attribute_list, test_list2):
-                if n == j:
-                    shared_attributes.append(n)
-            if len(set(shared_attributes)) == 4:
+
+        master_list = [rowlist, columnlist, Mdiagonallist, mdiagonallist]
+        for list in master_list:  # Checks all lists for whitespaces
+            if " " not in list:
                 return True
+            return False
 
     def winner(self, turns=None, player=None):
         """
-        Checks match conditions, if a winner arises
+        Checks match conditions, , if a winner arises
         ends match loop and announces victory
         """
 
