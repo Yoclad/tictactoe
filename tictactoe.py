@@ -16,20 +16,6 @@ class Token:  # Piece attributes
         piece.hole = hole
         piece.shape = shape
 
-    def moves_made(piece, received, gave):
-        """
-        Counts passed type of pieces received
-        and given by first player. Pieces received and
-        given by player 1 effectively just models player 1's
-        pieces played and player 2's pieces played
-        respectively. Output will be displayed in endgame output.
-        """
-
-        piece.player = [[], []]
-        piece.player[0].append(received)  # Player 1's pieces
-        piece.player[1].append(gave)  # Player 2's pieces
-        return piece.player
-
 
 class Board:  # Main game
 
@@ -83,30 +69,81 @@ class Board:  # Main game
             mdiagonallist.append(self.board[i][(self.dim - 1) - i])
 
         master_list = [rowlist, columnlist, Mdiagonallist, mdiagonallist]
-        for list in master_list:  # Checks all lists for whitespaces
-            if " " not in list:
-                return True
-            return False
+        for line in master_list:  # Checks all lists for whitespaces
+            if " " not in line:
+                master_list.remove(line)
+            return master_list
 
-    def winner(self, turns=None, player=None):
+    @staticmethod
+    def attribute_conversion(attributes):
         """
-        Checks match conditions, , if a winner arises
-        ends match loop and announces victory
+        Converts the player's numeric string input into
+        boolean values so the winner function can find
+        winning patterns of 4 during the game. Effectively
+        just a helper function.
+
+        Key (order matters):
+        size: True = big, False = small,
+        color: True = beige, False = chocolate,
+        shape: True = square, False = circle,
+        hole: True = hole, False = hallow,
         """
 
-        if not self.groupcheck():  # Checks to see if a row / column / diagonal win condition has been met
-            return False
+        token_attributes = []
+        for attribute in attributes:  # Converts numeric entry to boolean
+            if attribute == "1":
+                token_attributes.append(True)
+            else:
+                token_attributes.append(False)
+        return token_attributes
+
+    @staticmethod
+    def piece_list(piece_number):
+        """
+        Stores game pieces and log of which are
+        availible to play. If user tries to use
+        or give piece that has already been played
+        it returns an error message and prompts the player
+        to pick another piece from the remaining pieces.
+        """
+        piece_list = []
+        if piece_list[piece_number] not in piece_list:
+            return "Your piece is unavailable\nAvailable pieces are: " + str(piece_list)
         else:
-            print("Congratulations! Player:", player, "has won over the course of", str(turns), "moves!\n")
-            print("The winner played: " + str(Piece.moves_made()[turns % 2]))
-            return True  # Will end game loop
+            piece_list.remove(piece_list[piece_number])  # removes played / given piece
+            return piece_list[piece_number]
 
-    def updateboard(self, token, usercoords, spots):
+    @staticmethod
+    def character_conversion(token):
         """
-        Places passed token, and its attributes, in
-        passed coordinates, will only update board with "x/o"
+        Checks passed token's attributes to determine
+        which piece to use from piece list
         """
-        self.board[usercoords[0]][usercoords[1]] = token  # Places token in designated spot
+        piece_numbers = [0, 1, 2, 3,
+                         4, 5, 6, 7,
+                         8, 9, 10, 11,
+                         12, 13, 14, 15]
+
+        if token.size:
+            piece_list.remove(smalls)
+        if token.color:
+            piece_list.remove(chocolates)
+        if token.shape:
+            piece_list.remove(circles)
+        if token.hole:
+            piece_list.remove(holes)
+
+        return piece_list(piece_number)
+
+    def updateboard(self, token_attributes, usercoords, spots):
+        """
+        Places passed token, and its passed attributes, in
+        passed coordinates,
+        """
+
+        token = Token(token_attributes[0], token_attributes[1], token_attributes[2], token_attributes[3])
+        token_character = character_conversion(token)
+        self.board[usercoords[0]][usercoords[1]] = token_character  # Places token in designated spot
         spots.remove(usercoords)  # Removes played spot from list of playable spots
 
     @staticmethod
@@ -121,37 +158,86 @@ class Board:  # Main game
         else:
             return True
 
+    @staticmethod
+    def moves_made(played, coordinates, gave):
+        """
+        Generates list of moves made for each player
+        to keep game record. Will be returned by end
+        of the game.
+
+        A single move consists of the piece played,
+        the coordinates where the piece was played,
+        and the piece given to the opposing player.
+        """
+
+        player_moves = [[], []]
+        player[0].append(played, "at", coordinates)
+        player[1].append("Gave", gave)
+        return player_moves
+
+    def winner(self, turns=None, player=None):
+        """
+        Checks token attributes of lines with groups of 4.
+        Attributes are assigned each turn. If a winner arises
+        ends match loop and announces victory
+        """
+        for line in self.groupcheck():
+            size = []  # Initializing lists for later set comprehension
+            shape = []
+            color = []
+            hole = []
+            for token in line:  # Appends each token's attributes to the line's attribute lists above
+                height.append(token.size)
+                shape.append(token.shape)
+                color.append(token.color)
+                hole.append(token.hole)
+            if (len(set(size)) or len(set(shape)) or len(set(color)) or len(set(hole))) == 1:
+                print("Congratulations! Player:", player, "has won over the course of", str(turns), "moves!\n")
+                print("The winner played: " + str(moves_made()[turns % 2]))
+                return True  # Will end game loop
+            else:
+                return False  # Game continues
+
     def play(self):
         """
         Main game loop, runs until winner returns True,
         runs user inputs through wincheck and legality functions
         """
 
+        attributes = []
         usercoords = [self.dim, self.dim]
         turn = 0
         playernum = 1
-        token = ["x"]
+        player1_moves = []
+        player2_moves = []
         while not (self.winner()):  # Main game loop
+            size = int(input("Enter 1 for big: "))
+            color = int(input("Enter 1 for light: "))
+            shape = int(input("Enter 1 for square: "))
+            hole = int(input("Enter 1 for hole: "))
             usercoords[0] = int(input("Player " + str(playernum) + " Enter Y coordinate: "))
-            usercoords[1] = int(input("Player " + str(playernum) + " Enter X coordinate: "))  # Main inputs
-            size = int(input("Enter 1 for light: "))
-            color = int(input("Enter 1 for big: "))
-            shape = int(input("Enter 1 for hole: "))
-            hallow = int(input("Enter 1 for square: "))
-            Piece.pieces(size, color, shape, hallow)
+            usercoords[1] = int(input("Player " + str(playernum) + " Enter X coordinate: "))
+
+            attributes.extend([size, color, shape, hole])
+            token_attributes = self.attribute_conversion(attributes)
 
             if not self.legality(usercoords, self.spots):  # If move illegal, turn not counted and player is helped
                 print("Your input was invalid, available coords are: " + str(self.spots))
             else:
                 if turn % 2 == 0:
-                    token[0] = "x{}".format(str(turn))
+                    token[0] = "character"
                 else:
-                    token[0] = "o{}".format(str(turn))
-                self.updateboard(token[0], usercoords, spots=self.spots)
+                    token[0] = "character"
+
+                if playernum == 1:
+                    player1_moves.append(self.moves_made("character", usercoords, ))
+                else:
+                    player2_moves.append(self.moves_made("character", usercoords, ))
+                self.updateboard(token_attributes, usercoords, spots=self.spots)
             turn += 1  # Progress
             playernum = str((turn % 2) + 1)  # Changes active player number
             print(Quarto)
-        return self.winner(player=playernum)
+        return self.winner(turns=turns, player=playernum)
 
 
 def main():
