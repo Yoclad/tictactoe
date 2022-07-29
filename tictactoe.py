@@ -1,6 +1,8 @@
 # Stephan McGlashan
 # CS3 tictactoe/quarto
 
+from termcolor import colored, cprint  # Piece colors
+
 
 class Token:  # Piece attributes
 
@@ -106,7 +108,15 @@ class Board:  # Main game
         it returns an error message and prompts the player
         to pick another piece from the remaining pieces.
         """
-        piece_list = []
+
+        piece_list = [colored("●", "red"), colored("●", "red", attrs=["underline"]), colored("◉", "red"),
+                      colored("◉", "red", attrs=["underline"]),
+                      colored("■", "red"), colored("■", "red", attrs=["underline"]), colored("◙", "red"),
+                      colored("◙", "red", attrs=["underline"]),
+                      colored("●", "blue"), colored("●", "blue", attrs=["underline"]), colored("◉", "blue"),
+                      colored("◉", "blue", attrs=["underline"]),
+                      colored("■", "blue"), colored("■", "blue", attrs=["underline"]), colored("◙", "blue"),
+                      colored("◙", "blue", attrs=["underline"])]
         if piece_list[piece_number] not in piece_list:
             return "Your piece is unavailable\nAvailable pieces are: " + str(piece_list)
         else:
@@ -117,8 +127,9 @@ class Board:  # Main game
     def character_conversion(token):
         """
         Checks passed token's attributes to determine
-        which piece to use from piece list
+        which ASCII piece to use from list
         """
+
         piece_numbers = [0, 1, 2, 3,
                          4, 5, 6, 7,
                          8, 9, 10, 11,
@@ -154,7 +165,7 @@ class Board:  # Main game
         """
 
         if usercoords not in spots:
-            return False  # Reports move as illegal if input is not in playable move list
+            return False  # Reports move as illegal if input is not in spot list
         else:
             return True
 
@@ -179,8 +190,9 @@ class Board:  # Main game
         """
         Checks token attributes of lines with groups of 4.
         Attributes are assigned each turn. If a winner arises
-        ends match loop and announces victory
+        ends match loop and announces victory with metrics
         """
+
         for line in self.groupcheck():
             size = []  # Initializing lists for later set comprehension
             shape = []
@@ -201,10 +213,18 @@ class Board:  # Main game
     def play(self):
         """
         Main game loop, runs until winner returns True,
-        runs user inputs through wincheck and legality functions
+        runs user inputs through 'winner' and 'legality'
+        functions. Also uses several arbitrary vars,
+        'turn', 'playernum', 'attributes' to ensure functionality
+        of all backend game functions.
+
+        Full game functionality. 1 to 1 transfer to real game. First player
+        chooses what piece to give next player, player with piece
+        chooses where to play the given piece. Continues until a played
+        piece meets the win conditions.
         """
 
-        attributes = []
+        attributes = []  # Arbitrary vars for functionality
         usercoords = [self.dim, self.dim]
         turn = 0
         playernum = 1
@@ -218,19 +238,14 @@ class Board:  # Main game
             usercoords[0] = int(input("Player " + str(playernum) + " Enter Y coordinate: "))
             usercoords[1] = int(input("Player " + str(playernum) + " Enter X coordinate: "))
 
-            attributes.extend([size, color, shape, hole])
+            attributes.extend([size, color, shape, hole])  # Adds desired attributes and converts to ASCII shape
             token_attributes = self.attribute_conversion(attributes)
 
-            if not self.legality(usercoords, self.spots):  # If move illegal, turn not counted and player is helped
+            if not self.legality(usercoords, self.spots):  # If input is illegal, turn not counted and player is helped
                 print("Your input was invalid, available coords are: " + str(self.spots))
             else:
-                if turn % 2 == 0:
-                    token[0] = "character"
-                else:
-                    token[0] = "character"
-
                 if playernum == 1:
-                    player1_moves.append(self.moves_made("character", usercoords, ))
+                    player1_moves.append(self.moves_made("character", usercoords, ))  # Logs legal moves
                 else:
                     player2_moves.append(self.moves_made("character", usercoords, ))
                 self.updateboard(token_attributes, usercoords, spots=self.spots)
@@ -242,7 +257,7 @@ class Board:  # Main game
 
 def main():
     """
-    Runs game code
+    Driver code
     """
 
     global Quarto
