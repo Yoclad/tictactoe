@@ -86,7 +86,7 @@ class Board:  # Main game
 
         Key (order matters):
         size: True = big, False = small,
-        color: True = beige, False = chocolate,
+        color: True = red, False = blue,
         shape: True = square, False = circle,
         hole: True = hole, False = hallow,
         """
@@ -127,24 +127,33 @@ class Board:  # Main game
     def character_conversion(token):
         """
         Checks passed token's attributes to determine
-        which ASCII piece to use from list
+        which ASCII piece to use from list then eliminates
+        all other characters from ASCII list
         """
 
         piece_numbers = [0, 1, 2, 3,
                          4, 5, 6, 7,
                          8, 9, 10, 11,
-                         12, 13, 14, 15]
+                         12, 13, 14, 15]  # Translates 1:1 to ASCII list
 
-        if token.size:
-            piece_list.remove(smalls)
-        if token.color:
-            piece_list.remove(chocolates)
-        if token.shape:
-            piece_list.remove(circles)
-        if token.hole:
-            piece_list.remove(holes)
+        circles = [0, 1, 2, 3, 8, 9, 10, 11]  # No divisibility pattern availible for these attributes
+        holes = [2, 3, 6, 7, 10, 11, 14, 15]
 
-        return piece_list(piece_number)
+        for piece in range(len(piece_numbers)):  # Loops for all piece and removes respective attributes
+            if token.size:
+                if piece % 2 == 1:
+                    piece_list.remove(piece)
+            if token.color:
+                if piece > 7:
+                    piece_list.remove(blue)
+            if token.shape:
+                if piece in circles:
+                    piece_list.remove(circle)
+            if token.hole:
+                if piece in holes:
+                    piece_list.remove(holes)
+
+        return piece_list(piece_number)  # Returns last remaining char that meets conditions
 
     def updateboard(self, token_attributes, usercoords, spots):
         """
@@ -156,6 +165,7 @@ class Board:  # Main game
         token_character = character_conversion(token)
         self.board[usercoords[0]][usercoords[1]] = token_character  # Places token in designated spot
         spots.remove(usercoords)  # Removes played spot from list of playable spots
+        return token
 
     @staticmethod
     def legality(usercoords, spots):
@@ -186,25 +196,39 @@ class Board:  # Main game
         player[1].append("Gave", gave)
         return player_moves
 
+    @staticmethod
+    def token_retrieval(line):
+        """
+        Helper function for the winner main loop.
+        will retrieve each token object from the
+        line in the current iteration so the boolean
+        attributes can be operated on to find similarities.
+        """
+
+        size = []  # Initializing lists for later set comprehension
+        shape = []
+        color = []
+        hole = []
+        for token in line:  # Appends each token's attributes to the line's attribute lists above
+
+            size.append(token.size)
+            shape.append(token.shape)
+            color.append(token.color)
+            hole.append(token.hole)
+
+        return size, shape, color, hole
+
     def winner(self, turns=None, player=None):
         """
         Checks token attributes of lines with groups of 4.
         Attributes are assigned each turn. If a winner arises
         ends match loop and announces victory with metrics
+        from 'moves_made' and amount of turns.
         """
-
-        for line in self.groupcheck():
-            size = []  # Initializing lists for later set comprehension
-            shape = []
-            color = []
-            hole = []
-            for token in line:  # Appends each token's attributes to the line's attribute lists above
-                height.append(token.size)
-                shape.append(token.shape)
-                color.append(token.color)
-                hole.append(token.hole)
+        for line in self.groupcheck():  # Retrieves groups from 'groupcheck' function to pass through 'token_retrieval'
+            size, shape, color, hole = self.token_retrieval(self, line)
             if (len(set(size)) or len(set(shape)) or len(set(color)) or len(set(hole))) == 1:
-                print("Congratulations! Player:", player, "has won over the course of", str(turns), "moves!\n")
+                print("Congratulations! Player:", str(player), "has won over the course of", str(turns), "moves!\n")
                 print("The winner played: " + str(moves_made()[turns % 2]))
                 return True  # Will end game loop
             else:
@@ -231,10 +255,14 @@ class Board:  # Main game
         player1_moves = []
         player2_moves = []
         while not (self.winner()):  # Main game loop
+            print("Player", str(playernum), ", choose the next piece to be played")
             size = int(input("Enter 1 for big: "))
             color = int(input("Enter 1 for light: "))
             shape = int(input("Enter 1 for square: "))
             hole = int(input("Enter 1 for hole: "))
+
+            playernum = str((turn % 2) + 1)  # Changes active player number
+
             usercoords[0] = int(input("Player " + str(playernum) + " Enter Y coordinate: "))
             usercoords[1] = int(input("Player " + str(playernum) + " Enter X coordinate: "))
 
@@ -248,11 +276,10 @@ class Board:  # Main game
                     player1_moves.append(self.moves_made("character", usercoords, ))  # Logs legal moves
                 else:
                     player2_moves.append(self.moves_made("character", usercoords, ))
-                self.updateboard(token_attributes, usercoords, spots=self.spots)
+                self.updateboard(token_attributes, usercoords, spots=self.spots)  # Places ASCII char in usercoords
             turn += 1  # Progress
-            playernum = str((turn % 2) + 1)  # Changes active player number
             print(Quarto)
-        return self.winner(turns=turns, player=playernum)
+        return self.winner(turns=turns, player=playernum)  # When game sequence ends returns winner / report
 
 
 def main():
