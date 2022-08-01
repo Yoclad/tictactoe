@@ -1,0 +1,31 @@
+class Player:
+
+    def __init__(self, received_piece):
+        """
+        Initializes piece received from
+        previous player.
+        """
+
+        self.received_piece = received_piece
+        pass
+
+    @staticmethod
+    def pick(piece_list):
+        """
+        User picks piece from list
+        of remaining pieces to pass
+        to the opponent.
+        """
+
+        print(piece_list)
+        picked_piece = str(input("Enter the index of the piece you would like to give: "))
+        return piece_list[picked_piece]
+
+    def play(self, piece, board):
+        """
+        Used previously picked piece for
+        current player to play on board.
+        """
+
+        Board.updateboard()
+        pass

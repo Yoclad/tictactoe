@@ -6,17 +6,63 @@ from termcolor import colored, cprint  # Piece colors
 
 class Token:  # Piece attributes
 
-    def __init__(piece, size, shape, color, hole):
+    def __init__(self, size, shape, color, hole):
         """
         Initializes each piece's dimensions
         as boolean values. Between color, height,
         having a hole, and shape.
         """
 
-        piece.color = color  # Booleans since each only has 2 states
-        piece.size = size
-        piece.hole = hole
-        piece.shape = shape
+        self.color = color  # Booleans since each only has 2 states
+        self.size = size
+        self.hole = hole
+        self.shape = shape
+
+    @staticmethod
+    def bool_to_bin(attribute_list):
+        """
+        Converts user boolean input
+        to binary to pass as key in
+        the character function later.
+        """
+
+        binary_attribute = []  # Binary number represented as list ex.\ ["0","1","1","0"]
+        for attribute in attribute_list:
+            if attribute:
+                binary_attribute.append(1)
+            else:
+                binary_attribute.append(0)
+
+        number = templist[0] * 1000 + templist[1] * 100 + templist[2] * 10 + templist[3] * 1
+        return str(number)
+
+    def __str__(self):
+        """
+        Handles piece representation on backend
+        so user input can be directly associate
+        ASCII 'piece'. Order of booleans is "size
+        color, shape, hole" matters.
+        """
+
+        piece_dict = {"0000": colored("●", "red"),
+                      "0001": colored("●", "red", attrs=["underline"]),
+                      "0010": colored("◉", "red"),
+                      "0011": colored("◉", "red", attrs=["underline"]),
+                      "0100": colored("■", "red"),
+                      "0101": colored("■", "red", attrs=["underline"]),
+                      "0110": colored("◙", "red"),
+                      "0111": colored("◙", "red", attrs=["underline"]),
+                      "1000": colored("●", "blue"),
+                      "1001": colored("●", "blue", attrs=["underline"]),
+                      "1010": colored("◉", "blue"),
+                      "1011": colored("◉", "blue", attrs=["underline"]),
+                      "1100": colored("■", "blue"),
+                      "1101": colored("■", "blue", attrs=["underline"]),
+                      "1110": colored("◙", "blue"),
+                      "1111": colored("◙", "blue", attrs=["underline"])}
+
+        attribute_list = [self.color, self.size, self.hole, self.shape]
+        return piece_dict[bool_to_bin(attribute_list)]  # Returns piece
 
 
 class Board:  # Main game
@@ -77,29 +123,6 @@ class Board:  # Main game
             return master_list
 
     @staticmethod
-    def attribute_conversion(attributes):
-        """
-        Converts the player's numeric string input into
-        boolean values so the winner function can find
-        winning patterns of 4 during the game. Effectively
-        just a helper function.
-
-        Key (order matters):
-        size: True = big, False = small,
-        color: True = red, False = blue,
-        shape: True = square, False = circle,
-        hole: True = hole, False = hallow,
-        """
-
-        token_attributes = []
-        for attribute in attributes:  # Converts numeric entry to boolean
-            if attribute == "1":
-                token_attributes.append(True)
-            else:
-                token_attributes.append(False)
-        return token_attributes
-
-    @staticmethod
     def piece_list(piece_number):
         """
         Stores game pieces and log of which are
@@ -123,47 +146,14 @@ class Board:  # Main game
             piece_list.remove(piece_list[piece_number])  # removes played / given piece
             return piece_list[piece_number]
 
-    @staticmethod
-    def character_conversion(token):
-        """
-        Checks passed token's attributes to determine
-        which ASCII piece to use from list then eliminates
-        all other characters from ASCII list
-        """
-
-        piece_numbers = [0, 1, 2, 3,
-                         4, 5, 6, 7,
-                         8, 9, 10, 11,
-                         12, 13, 14, 15]  # Translates 1:1 to ASCII list
-
-        circles = [0, 1, 2, 3, 8, 9, 10, 11]  # No divisibility pattern availible for these attributes
-        holes = [2, 3, 6, 7, 10, 11, 14, 15]
-
-        for piece in range(len(piece_numbers)):  # Loops for all piece and removes respective attributes
-            if token.size:
-                if piece % 2 == 1:
-                    piece_list.remove(piece)
-            if token.color:
-                if piece > 7:
-                    piece_list.remove(piece)
-            if token.shape:
-                if piece in circles:
-                    piece_list.remove(piece)
-            if token.hole:
-                if piece in holes:
-                    piece_list.remove(piece)
-
-        return piece_list(piece_number)  # Returns last remaining char that meets conditions
-
     def updateboard(self, token_attributes, usercoords, spots):
         """
-        Places passed token, and its passed attributes, in
-        passed coordinates,
+        Places passed token, and its passed attributes,
+        in passed coordinates
         """
 
         token = Token(token_attributes[0], token_attributes[1], token_attributes[2], token_attributes[3])
-        token_item = character_conversion(token), token
-        self.board[usercoords[0]][usercoords[1]] = token_item[0]  # Places token in designated spot
+        self.board[usercoords[0]][usercoords[1]] = character_conversion(token)  # Places token in passed spot
         spots.remove(usercoords)  # Removes played spot from list of playable spots
         return
 
@@ -193,7 +183,7 @@ class Board:  # Main game
         """
 
         player_moves = []
-        player.append(played, "at", str(coordinates))
+        player.append(played, "at:", str(coordinates))
         return player_moves
 
     @staticmethod
@@ -210,7 +200,7 @@ class Board:  # Main game
         color = []
         hole = []
         for token in line:  # Appends each token's attributes to the line's attribute lists above
-            token_attributes = token[1]  # Accesses attributes in token tuple
+            # token_attributes = token[1]  # Accesses attributes in token tuple # need a better way to do this
             size.append(token_attributes.size)
             shape.append(token_attributes.shape)
             color.append(token_attributes.color)
@@ -291,11 +281,11 @@ def main():
     """
     Driver code
     """
-
-    global Quarto
-    Quarto = Board(4)
+    print(Token(True, True, True, False))
+    # global Quarto
+    # Quarto = Board(4)
     # TTT = Board(3)
-    Quarto.play()
+    # Quarto.play()
     # TTT.play()
 
 
