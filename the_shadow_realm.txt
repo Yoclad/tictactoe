@@ -85,3 +85,16 @@ class Player:
             else:
                 token_attributes.append(False)
         return token_attributes
+
+
+#piece_list = [colored("●", "red"), colored("●", "red", attrs=["underline"]), colored("◉", "red"),
+                      colored("◉", "red", attrs=["underline"]),
+                      colored("■", "red"), colored("■", "red", attrs=["underline"]), colored("◙", "red"),
+                      colored("◙", "red", attrs=["underline"]),
+                      colored("●", "blue"), colored("●", "blue", attrs=["underline"]), colored("◉", "blue"),
+                      colored("◉", "blue", attrs=["underline"]),
+                      colored("■", "blue"), colored("■", "blue", attrs=["underline"]), colored("◙", "blue"),
+                      colored("◙", "blue", attrs=["underline"])]
+
+                   attributes.extend([size, color, shape, hole])  # Adds desired attributes and converts to ASCII shape
+            token_attributes = self.attribute_conversion(attributes)
