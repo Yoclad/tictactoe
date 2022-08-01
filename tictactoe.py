@@ -33,8 +33,9 @@ class Token:  # Piece attributes
             else:
                 binary_attribute.append(0)
 
-        number = templist[0] * 1000 + templist[1] * 100 + templist[2] * 10 + templist[3] * 1
-        return str(number)
+        binary = ""
+        binary += [attribute for attribute in binary_attribute]
+        return str(binary)
 
     def __str__(self):
         """
