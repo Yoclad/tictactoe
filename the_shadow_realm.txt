@@ -29,3 +29,59 @@ class Player:
 
         Board.updateboard()
         pass
+
+
+@staticmethod
+    def character_conversion(token):
+        """
+        Checks passed token's attributes to determine
+        which ASCII piece to use from list then eliminates
+        all other characters from ASCII list
+        """
+
+        piece_numbers = [0, 1, 2, 3,
+                         4, 5, 6, 7,
+                         8, 9, 10, 11,
+                         12, 13, 14, 15]  # Translates 1:1 to ASCII list
+
+        circles = [0, 1, 2, 3, 8, 9, 10, 11]  # No divisibility pattern availible for these attributes
+        holes = [2, 3, 6, 7, 10, 11, 14, 15]
+
+        for piece in range(len(piece_numbers)):  # Loops for all piece and removes respective attributes
+            if token.size:
+                if piece % 2 == 1:
+                    piece_list.remove(piece)
+            if token.color:
+                if piece > 7:
+                    piece_list.remove(piece)
+            if token.shape:
+                if piece in circles:
+                    piece_list.remove(piece)
+            if token.hole:
+                if piece in holes:
+                    piece_list.remove(piece)
+
+        return piece_list(piece_number)  # Returns last remaining char that meets conditions
+
+@staticmethod
+    def attribute_conversion(attributes):
+        """
+        Converts the player's numeric string input into
+        boolean values so the winner function can find
+        winning patterns of 4 during the game. Effectively
+        just a helper function.
+
+        Key (order matters):
+        size: True = big, False = small,
+        color: True = red, False = blue,
+        shape: True = square, False = circle,
+        hole: True = hole, False = hallow,
+        """
+
+        token_attributes = []
+        for attribute in attributes:  # Converts numeric entry to boolean
+            if attribute == "1":
+                token_attributes.append(True)
+            else:
+                token_attributes.append(False)
+        return token_attributes
