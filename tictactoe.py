@@ -145,13 +145,13 @@ class Board:  # Main game
                     piece_list.remove(piece)
             if token.color:
                 if piece > 7:
-                    piece_list.remove(blue)
+                    piece_list.remove(piece)
             if token.shape:
                 if piece in circles:
-                    piece_list.remove(circle)
+                    piece_list.remove(piece)
             if token.hole:
                 if piece in holes:
-                    piece_list.remove(holes)
+                    piece_list.remove(piece)
 
         return piece_list(piece_number)  # Returns last remaining char that meets conditions
 
@@ -162,10 +162,10 @@ class Board:  # Main game
         """
 
         token = Token(token_attributes[0], token_attributes[1], token_attributes[2], token_attributes[3])
-        token_character = character_conversion(token)
-        self.board[usercoords[0]][usercoords[1]] = token_character  # Places token in designated spot
+        token_item = character_conversion(token), token
+        self.board[usercoords[0]][usercoords[1]] = token_item[0]  # Places token in designated spot
         spots.remove(usercoords)  # Removes played spot from list of playable spots
-        return token
+        return
 
     @staticmethod
     def legality(usercoords, spots):
@@ -180,20 +180,20 @@ class Board:  # Main game
             return True
 
     @staticmethod
-    def moves_made(played, coordinates, gave):
+    def moves_made(played=None, coordinates=None):
         """
-        Generates list of moves made for each player
-        to keep game record. Will be returned by end
-        of the game.
+        Generates string of moves made for each player
+        to keep game record. Returned every turn to each
+        player's move list to be reported at the end of
+        the game.
 
         A single move consists of the piece played,
         the coordinates where the piece was played,
         and the piece given to the opposing player.
         """
 
-        player_moves = [[], []]
-        player[0].append(played, "at", coordinates)
-        player[1].append("Gave", gave)
+        player_moves = []
+        player.append(played, "at", str(coordinates))
         return player_moves
 
     @staticmethod
@@ -210,26 +210,27 @@ class Board:  # Main game
         color = []
         hole = []
         for token in line:  # Appends each token's attributes to the line's attribute lists above
-
-            size.append(token.size)
-            shape.append(token.shape)
-            color.append(token.color)
-            hole.append(token.hole)
+            token_attributes = token[1]  # Accesses attributes in token tuple
+            size.append(token_attributes.size)
+            shape.append(token_attributes.shape)
+            color.append(token_attributes.color)
+            hole.append(token_attributes.hole)
 
         return size, shape, color, hole
 
-    def winner(self, turns=None, player=None):
+    def winner(self, turns=None, playernum=None, winners_moves=None):
         """
         Checks token attributes of lines with groups of 4.
         Attributes are assigned each turn. If a winner arises
         ends match loop and announces victory with metrics
-        from 'moves_made' and amount of turns.
+        from 'moves_made' generated list and amount of turns.
         """
+
         for line in self.groupcheck():  # Retrieves groups from 'groupcheck' function to pass through 'token_retrieval'
-            size, shape, color, hole = self.token_retrieval(self, line)
+            size, shape, color, hole = self.token_retrieval(line)
             if (len(set(size)) or len(set(shape)) or len(set(color)) or len(set(hole))) == 1:
-                print("Congratulations! Player:", str(player), "has won over the course of", str(turns), "moves!\n")
-                print("The winner played: " + str(moves_made()[turns % 2]))
+                print("Congratulations! Player:", str(playernum), "has won over the course of", str(turns), "moves!\n")
+                print("Winner's moves: " + str(winners_moves))
                 return True  # Will end game loop
             else:
                 return False  # Game continues
@@ -273,13 +274,17 @@ class Board:  # Main game
                 print("Your input was invalid, available coords are: " + str(self.spots))
             else:
                 if playernum == 1:
-                    player1_moves.append(self.moves_made("character", usercoords, ))  # Logs legal moves
+                    player1_moves.append(self.moves_made("character", usercoords))  # Logs legal moves
                 else:
-                    player2_moves.append(self.moves_made("character", usercoords, ))
+                    player2_moves.append(self.moves_made("character", usercoords))
                 self.updateboard(token_attributes, usercoords, spots=self.spots)  # Places ASCII char in usercoords
             turn += 1  # Progress
             print(Quarto)
-        return self.winner(turns=turns, player=playernum)  # When game sequence ends returns winner / report
+        if playernum == 1:
+            winners_moves = player1_moves
+        else:
+            winners_moves = player2_moves
+        return self.winner(turns=turns, player=playernum, winners_moves=winners_moves)  # Returns winner / report at end
 
 
 def main():
