@@ -4,6 +4,26 @@
 from termcolor import colored, cprint  # Piece colors
 
 
+def bool_to_bin(attribute_list):
+    """
+    Converts user boolean input
+    to binary to pass as key in
+    the character function later.
+    """
+
+    binary_attribute = []  # Binary number represented as list ex.\ ["0","1","1","0"]
+    for attribute in attribute_list:
+        if attribute:
+            binary_attribute.append(1)
+        else:
+            binary_attribute.append(0)
+
+    binary = ""
+    for attribute in binary_attribute:
+        binary += str(attribute)
+    return binary
+
+
 class Token:  # Piece attributes
 
     def __init__(self, size, shape, color, hole):
@@ -18,25 +38,6 @@ class Token:  # Piece attributes
         self.hole = hole
         self.shape = shape
 
-    @staticmethod
-    def bool_to_bin(attribute_list):
-        """
-        Converts user boolean input
-        to binary to pass as key in
-        the character function later.
-        """
-
-        binary_attribute = []  # Binary number represented as list ex.\ ["0","1","1","0"]
-        for attribute in attribute_list:
-            if attribute:
-                binary_attribute.append(1)
-            else:
-                binary_attribute.append(0)
-
-        binary = ""
-        binary += [attribute for attribute in binary_attribute]
-        return str(binary)
-
     def __str__(self):
         """
         Handles piece representation on backend
@@ -46,23 +47,23 @@ class Token:  # Piece attributes
         """
 
         piece_dict = {"0000": colored("●", "red"),
-                      "0001": colored("●", "red", attrs=["underline"]),
-                      "0010": colored("◉", "red"),
-                      "0011": colored("◉", "red", attrs=["underline"]),
-                      "0100": colored("■", "red"),
-                      "0101": colored("■", "red", attrs=["underline"]),
-                      "0110": colored("◙", "red"),
-                      "0111": colored("◙", "red", attrs=["underline"]),
-                      "1000": colored("●", "blue"),
-                      "1001": colored("●", "blue", attrs=["underline"]),
-                      "1010": colored("◉", "blue"),
-                      "1011": colored("◉", "blue", attrs=["underline"]),
-                      "1100": colored("■", "blue"),
-                      "1101": colored("■", "blue", attrs=["underline"]),
-                      "1110": colored("◙", "blue"),
+                      "1000": colored("●", "red", attrs=["underline"]),
+                      "0001": colored("◉", "red"),
+                      "1001": colored("◉", "red", attrs=["underline"]),
+                      "0010": colored("■", "red"),
+                      "1010": colored("■", "red", attrs=["underline"]),
+                      "0011": colored("◙", "red"),
+                      "1011": colored("◙", "red", attrs=["underline"]),
+                      "0100": colored("●", "blue"),
+                      "1100": colored("●", "blue", attrs=["underline"]),
+                      "0101": colored("◉", "blue"),
+                      "1101": colored("◉", "blue", attrs=["underline"]),
+                      "0110": colored("■", "blue"),
+                      "1110": colored("■", "blue", attrs=["underline"]),
+                      "0111": colored("◙", "blue"),
                       "1111": colored("◙", "blue", attrs=["underline"])}
 
-        attribute_list = [self.color, self.size, self.hole, self.shape]
+        attribute_list = [self.size, self.color, self.shape, self.hole]
         return piece_dict[bool_to_bin(attribute_list)]  # Returns piece
 
 
@@ -118,43 +119,38 @@ class Board:  # Main game
             mdiagonallist.append(self.board[i][(self.dim - 1) - i])
 
         master_list = [rowlist, columnlist, Mdiagonallist, mdiagonallist]
-        for line in master_list:  # Checks all lists for whitespaces
-            if " " not in line:
-                master_list.remove(line)
-            return master_list
+
+
+        return master_list
 
     @staticmethod
     def piece_list(piece_number):
         """
         Stores game pieces and log of which are
-        availible to play. If user tries to use
+        availible to play in binary list. List is
+        generated using the built-in 'bin()' function.
+        The output string is cleaned using the
+        '.replace()' built-in. If user tries to use
         or give piece that has already been played
         it returns an error message and prompts the player
         to pick another piece from the remaining pieces.
         """
 
-        piece_list = [colored("●", "red"), colored("●", "red", attrs=["underline"]), colored("◉", "red"),
-                      colored("◉", "red", attrs=["underline"]),
-                      colored("■", "red"), colored("■", "red", attrs=["underline"]), colored("◙", "red"),
-                      colored("◙", "red", attrs=["underline"]),
-                      colored("●", "blue"), colored("●", "blue", attrs=["underline"]), colored("◉", "blue"),
-                      colored("◉", "blue", attrs=["underline"]),
-                      colored("■", "blue"), colored("■", "blue", attrs=["underline"]), colored("◙", "blue"),
-                      colored("◙", "blue", attrs=["underline"])]
-        if piece_list[piece_number] not in piece_list:
-            return "Your piece is unavailable\nAvailable pieces are: " + str(piece_list)
-        else:
-            piece_list.remove(piece_list[piece_number])  # removes played / given piece
-            return piece_list[piece_number]
+        bin_list = [bin(index).replace('0b', '') for index in range(16)]  #
 
-    def updateboard(self, token_attributes, usercoords, spots):
+        if bin_list[piece_number] not in bin_list:
+            return "Your piece is unavailable\nAvailable pieces are: " + str(bin_list)
+        else:
+            bin_list.remove(piece_number)  # removes played / given piece
+            return bin_list[piece_number]
+
+    def updateboard(self, token, usercoords, spots):
         """
         Places passed token, and its passed attributes,
         in passed coordinates
         """
 
-        token = Token(token_attributes[0], token_attributes[1], token_attributes[2], token_attributes[3])
-        self.board[usercoords[0]][usercoords[1]] = character_conversion(token)  # Places token in passed spot
+        self.board[usercoords[0]][usercoords[1]] = str(token)  # Places token in passed spot
         spots.remove(usercoords)  # Removes played spot from list of playable spots
         return
 
@@ -183,12 +179,11 @@ class Board:  # Main game
         and the piece given to the opposing player.
         """
 
-        player_moves = []
-        player.append(played, "at:", str(coordinates))
+        player_moves = [played, "at:", str(coordinates)]
         return player_moves
 
     @staticmethod
-    def token_retrieval(line):
+    def token_check(line):
         """
         Helper function for the winner main loop.
         will retrieve each token object from the
@@ -196,16 +191,15 @@ class Board:  # Main game
         attributes can be operated on to find similarities.
         """
 
-        size = []  # Initializing lists for later set comprehension
-        shape = []
-        color = []
-        hole = []
+        sizes = []  # Initializing lists for later set comprehension
+        shapes = []
+        colors = []
+        holes = []
         for token in line:  # Appends each token's attributes to the line's attribute lists above
-            # token_attributes = token[1]  # Accesses attributes in token tuple # need a better way to do this
-            size.append(token_attributes.size)
-            shape.append(token_attributes.shape)
-            color.append(token_attributes.color)
-            hole.append(token_attributes.hole)
+            sizes.append(token.size)
+            shapes.append(token.shape)
+            colors.append(token.color)
+            holes.append(token.hole)
 
         return size, shape, color, hole
 
@@ -218,7 +212,11 @@ class Board:  # Main game
         """
 
         for line in self.groupcheck():  # Retrieves groups from 'groupcheck' function to pass through 'token_retrieval'
-            size, shape, color, hole = self.token_retrieval(line)
+
+            if ' ' not in line:
+                size, shape, color, hole = self.token_check(line)
+            else:
+                break
             if (len(set(size)) or len(set(shape)) or len(set(color)) or len(set(hole))) == 1:
                 print("Congratulations! Player:", str(playernum), "has won over the course of", str(turns), "moves!\n")
                 print("Winner's moves: " + str(winners_moves))
@@ -240,8 +238,7 @@ class Board:  # Main game
         piece meets the win conditions.
         """
 
-        attributes = []  # Arbitrary vars for functionality
-        usercoords = [self.dim, self.dim]
+        usercoords = [self.dim, self.dim]  # Arbitrary vars for functionality
         turn = 0
         playernum = 1
         player1_moves = []
@@ -249,7 +246,7 @@ class Board:  # Main game
         while not (self.winner()):  # Main game loop
             print("Player", str(playernum), ", choose the next piece to be played")
             size = int(input("Enter 1 for big: "))
-            color = int(input("Enter 1 for light: "))
+            color = int(input("Enter 1 for blue: "))
             shape = int(input("Enter 1 for square: "))
             hole = int(input("Enter 1 for hole: "))
 
@@ -258,9 +255,7 @@ class Board:  # Main game
             usercoords[0] = int(input("Player " + str(playernum) + " Enter Y coordinate: "))
             usercoords[1] = int(input("Player " + str(playernum) + " Enter X coordinate: "))
 
-            attributes.extend([size, color, shape, hole])  # Adds desired attributes and converts to ASCII shape
-            token_attributes = self.attribute_conversion(attributes)
-
+            token = Token(size, color, shape, hole)
             if not self.legality(usercoords, self.spots):  # If input is illegal, turn not counted and player is helped
                 print("Your input was invalid, available coords are: " + str(self.spots))
             else:
@@ -268,7 +263,7 @@ class Board:  # Main game
                     player1_moves.append(self.moves_made("character", usercoords))  # Logs legal moves
                 else:
                     player2_moves.append(self.moves_made("character", usercoords))
-                self.updateboard(token_attributes, usercoords, spots=self.spots)  # Places ASCII char in usercoords
+                self.updateboard(token, usercoords, spots=self.spots)  # Places ASCII char in usercoords
             turn += 1  # Progress
             print(Quarto)
         if playernum == 1:
@@ -282,11 +277,12 @@ def main():
     """
     Driver code
     """
-    print(Token(True, True, True, False))
-    # global Quarto
-    # Quarto = Board(4)
+
+
+    global Quarto
+    Quarto = Board(4)
     # TTT = Board(3)
-    # Quarto.play()
+    Quarto.play()
     # TTT.play()
 
 
