@@ -24,8 +24,8 @@ class Solver(Player):
         return self.token
 
     def play_random_spot(self):
-        xcoord = random.randint(0,3)
-        ycoord = random.randint(0,3)
+        xcoord = random.randint(0, 3)
+        ycoord = random.randint(0, 3)
         self.spot = [xcoord, ycoord]
 
         return self.spot

@@ -262,7 +262,7 @@ class Player:
         return self.spot
 
 
-class Game:
+class Game(Quarto):
 
     def __init__(self):
         """
@@ -288,7 +288,7 @@ class Game:
         playernum = 1  # Arbitrary vars for functionality
         player1_moves = []
         player2_moves = []
-        while not (Quarto.winner()):  # Main game loop
+        while not (self.winner()):  # Main game loop
             print("Player", str(playernum), ", choose the next piece to be played:\n")
             token = Player.pick_piece()
 
@@ -297,8 +297,8 @@ class Game:
             print("Player", str(playernum), ", where would you like to play your piece?\n")
             usercoords = Player.play_piece()
 
-            if not Quarto.legality(usercoords, Quarto.spots):  # If input is illegal, turn not counted and player helped
-                print("Your spot is not available, your options are: " + str(Quarto.spots))
+            if not self.legality(usercoords, self.spots):  # If input is illegal, turn not counted and player helped
+                print("Your spot is not available, your options are: " + str(self.spots))
             else:
                 if playernum == 1:
                     player1_moves.append(Quarto.moves_made("character", usercoords))  # Logs legal moves
@@ -320,8 +320,9 @@ def main():
     """
 
     global Quarto
-    quarto = Quarto(4)
-    quarto.play()
+    Quarto(4)
+    new_game=Game()
+    new_game.play()
 
 
 if __name__ == "__main__":
