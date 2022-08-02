@@ -67,6 +67,46 @@ class Token:  # Piece attributes
         return piece_dict[bool_to_bin(attribute_list)]  # Returns piece
 
 
+class Player:
+
+    def __init__(self, token=None, spot=None):
+        """
+        Initializes the given player's
+        token and spot for them to choose.
+        """
+
+        self.token = token
+        self.spot = spot
+
+    def pick_piece(self):
+        """
+        Prompts player to enter their desired piece
+        attributes in numeric form. Passes their input
+        to the Token class which will return an ASCII
+        token string which is then returned.
+        """
+
+        size = int(input("Enter 1 for a tall piece: "))
+        color = int(input("Enter 1 for a blue piece: "))
+        shape = int(input("Enter 1 for a square piece: "))
+        hole = int(input("Enter 1 for a hole piece: "))
+
+        self.token = Token(size, color, shape, hole)
+        return self.token
+
+    def play_piece(self):
+        """
+        Prompts player to enter their desired
+        coordinates to play the piece they had
+        received.
+        """
+
+        xcoord = int(input("Enter Y coordinate: "))
+        ycoord = int(input("Enter X coordinate: "))
+        self.spot = [xcoord, ycoord]
+        return self.spot
+
+
 class Quarto:  # Main game
 
     def __init__(self, dim):
@@ -74,7 +114,7 @@ class Quarto:  # Main game
         Initializes a 'dim' by 'dim' board
         Uses generators to initialize spots on virtual board.
         """
-
+        self.player = Player()
         self.dim = dim
         self.board = [[" "] * dim for _ in range(dim)]
         self.spots = [[j, i] for i in range(dim) for j in range(dim)]  # Generates lists of possible spots on board
@@ -96,12 +136,7 @@ class Quarto:  # Main game
         horizontal_rule = ("---" * self.dim + "-" * (self.dim - 1) + "\n")  # Creates horizontal bars on board
         return horizontal_rule.join(rows)
 
-    def __repr__(self):
-        """
-        Ensures output will look clean
-        """
 
-        return str(self)
 
     def groupcheck(self):
         """
@@ -222,55 +257,6 @@ class Quarto:  # Main game
             else:
                 return False  # Game continues
 
-
-class Player:
-
-    def __init__(self, token, spot):
-        """
-        Initializes the given player's
-        token and spot for them to choose.
-        """
-        self.token = token
-        self.spot = spot
-
-    def pick_piece(self):
-        """
-        Prompts player to enter their desired piece
-        attributes in numeric form. Passes their input
-        to the Token class which will return an ASCII
-        token string which is then returned.
-        """
-
-        size = int(input("Enter 1 for a tall piece: "))
-        color = int(input("Enter 1 for a blue piece: "))
-        shape = int(input("Enter 1 for a square piece: "))
-        hole = int(input("Enter 1 for a hole piece: "))
-
-        self.token = Token(size, color, shape, hole)
-        return self.token
-
-    def play_piece(self):
-        """
-        Prompts player to enter their desired
-        coordinates to play the piece they had
-        received.
-        """
-
-        xcoord = int(input("Enter Y coordinate: "))
-        ycoord = int(input("Enter X coordinate: "))
-        self.spot = [xcoord, ycoord]
-        return self.spot
-
-
-class Game(Quarto):
-
-    def __init__(self):
-        """
-        Initializes turns.
-        """
-
-        self.turn = 0
-
     def play(self):
         """
         Main game loop, runs until winner returns True,
@@ -285,33 +271,34 @@ class Game(Quarto):
         piece meets the win conditions.
         """
 
-        playernum = 1  # Arbitrary vars for functionality
+        playernum = 2  # Arbitrary vars for functionality
+        turn = 0
         player1_moves = []
         player2_moves = []
         while not (self.winner()):  # Main game loop
             print("Player", str(playernum), ", choose the next piece to be played:\n")
-            token = Player.pick_piece()
+            token = self.player.pick_piece()
 
-            playernum = str((self.turn % 2) + 1)  # Changes active player number
+            playernum = str((turn % 2) + 1)  # Changes active player number
 
             print("Player", str(playernum), ", where would you like to play your piece?\n")
-            usercoords = Player.play_piece()
+            usercoords = self.player.play_piece()
 
             if not self.legality(usercoords, self.spots):  # If input is illegal, turn not counted and player helped
                 print("Your spot is not available, your options are: " + str(self.spots))
             else:
                 if playernum == 1:
-                    player1_moves.append(Quarto.moves_made("character", usercoords))  # Logs legal moves
+                    player1_moves.append(self.moves_made("character", usercoords))  # Logs legal moves
                 else:
-                    player2_moves.append(Game.moves_made("character", usercoords))
-                Quarto.updateboard(token, usercoords, spots=Game.spots)  # Places ASCII char in usercoords
-            self.turn += 1  # Progress
-            print(Quarto)
+                    player2_moves.append(self.moves_made("character", usercoords))
+                self.updateboard(token, usercoords, spots=self.spots)  # Places ASCII char in usercoords
+            turn += 1  # Progress
+            print(self)
         if playernum == 1:
             winners_moves = player1_moves
         else:
             winners_moves = player2_moves
-        return Quarto.winner(turns=turns, player=playernum, winners_moves=winners_moves)  # Returns win report at end
+        return self.winner(turns=turns, player=playernum, winners_moves=winners_moves)  # Returns win report at end
 
 
 def main():
@@ -319,10 +306,8 @@ def main():
     Driver code
     """
 
-    global Quarto
-    Quarto(4)
-    new_game=Game()
-    new_game.play()
+    quarto = Quarto(4)
+    quarto.play()
 
 
 if __name__ == "__main__":
