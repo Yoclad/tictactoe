@@ -169,7 +169,7 @@ class Quarto:  # Main game
         it returns an error message and prompts the player
         to pick another piece from the remaining pieces.
         """
-        
+
         if self.bin_list[piece_number] not in self.bin_list:
             return "Your piece is unavailable\nAvailable pieces are: " + str(bin_list)
         else:
