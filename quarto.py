@@ -3,6 +3,9 @@
 
 from termcolor import *  # Piece colors
 
+bin_list = [1, "0000", 1, "1000", 1, "0001", 1, "1001", 1, "0010", 1, "1010", 1, "0011", 1, "1011",
+            1, "0100", 1, "1100", 1, "0101", 1, "1101", 1, "0110", 1, "1110", 1, "0111", 1, "1111"]
+
 
 def bool_to_bin(attribute_list):
     """
@@ -78,7 +81,7 @@ class Player:
         self.piece = piece
         self.spot = spot
 
-    def pick_piece(self, base_input = None):
+    def pick_piece(self, base_input=None):
         """
         Prompts player to enter their desired piece
         number. Passes their input to the binary conversion
@@ -91,8 +94,7 @@ class Player:
             base_input = int(input("Enter the piece number: "))
         else:
             pass
-        self.piece = (base_input*2)-1
-        print(self.piece)
+        self.piece = (base_input * 2) - 1
         return self.piece
 
     def play_piece(self):
@@ -110,15 +112,14 @@ class Player:
 
 class Quarto:  # Main game
 
-    def __init__(self, dim):
+    def __init__(self, dim, main_bin_list=None):
         """
         Initializes a 'dim' by 'dim' board
         Uses generators to initialize spots on virtual board.
         """
         self.player = Player()
         self.dim = dim
-        self.bin_list = [1, "0000", 1, "1000", 1, "0001", 1, "1001", 1, "0010", 1, "1010", 1, "0011", 1, "1011",
-                         1, "0100", 1, "1100", 1, "0101", 1, "1101", 1, "0110", 1, "1110", 1, "0111", 1, "1111"]
+        self.bin_list = main_bin_list
         self.board = [[" "] * dim for _ in range(dim)]
         self.spots = [[j, i] for i in range(dim) for j in range(dim)]  # Generates lists of possible spots on board
 
@@ -168,7 +169,7 @@ class Quarto:  # Main game
         it returns an error message and prompts the player
         to pick another piece from the remaining pieces.
         """
-
+        
         if self.bin_list[piece_number] not in self.bin_list:
             return "Your piece is unavailable\nAvailable pieces are: " + str(bin_list)
         else:
@@ -211,7 +212,7 @@ class Quarto:  # Main game
         and the piece given to the opposing player.
         """
 
-        player_moves = [played, "at:", str(coordinates)]
+        player_moves = played, "at:", str(coordinates)
         return player_moves
 
     @staticmethod
@@ -241,21 +242,25 @@ class Quarto:  # Main game
         ends match loop and announces victory with metrics
         from 'moves_made' generated list and amount of turns.
         """
-
-        for line in self.groupcheck():  # Retrieves groups from 'groupcheck' function to
-            if ' ' not in line:
-                size, shape, color, hole = self.token_check(line)
-            else:
-                break
-            if (len(set(size)) or len(set(shape)) or len(set(color)) or len(set(hole))) == 1:
-                print("Congratulations! Player:", str(playernum), "has won over the course of", str(turns), "moves!\n")
-                print("Winner's moves: " + str(winners_moves))
-                return True  # Will end game loop
-            elif len(self.spots) == 0:
-                print("The game has ended in a draw!")
-                return True  # Will end game loop
-            else:
-                return False  # Game continues
+        if len(self.spots) > 0:
+            for line in self.groupcheck():  # Retrieves groups from 'groupcheck' function to
+                if ' ' not in line:
+                    size, shape, color, hole = self.token_check(line)
+                else:
+                    break
+                if (len(set(size)) or len(set(shape)) or len(set(color)) or len(set(hole))) == 1:
+                    print("Congratulations! Player:", str(playernum), "has won over the course of", str(turns),
+                          "moves!\n")
+                    print("Winner's moves: " + str(winners_moves))
+                    return True  # Will end game loop
+                elif len(self.spots) == 0:
+                    print("The game has ended in a draw!")
+                    return True  # Will end game loop
+                else:
+                    return False  # Game continues
+        else:
+            print("There has been no winner after", str(turns), "moves, the match is a draw!")
+            return True
 
     def play(self):
         """
@@ -278,7 +283,7 @@ class Quarto:  # Main game
                       "9:", colored("●", "blue"), "10:", colored("●", "blue", attrs=["underline"]),
                       "11:", colored("◉", "blue"), "12:", colored("◉", "blue", attrs=["underline"]),
                       "13:", colored("■", "blue"), "14:", colored("■", "blue", attrs=["underline"]),
-                      "15:", colored("◙", "blue"), "16:",  colored("◙", "blue", attrs=["underline"])]
+                      "15:", colored("◙", "blue"), "16:", colored("◙", "blue", attrs=["underline"])]
 
         playernum = 2  # Arbitrary vars for functionality
 
@@ -304,6 +309,9 @@ class Quarto:  # Main game
 
             usercoords = self.player.play_piece()
 
+            piece_list.pop(piece_number)
+            piece_list.pop(piece_number - 1)
+
             if not self.legality(usercoords, self.spots):  # If input is illegal, turn not counted and player helped
                 print("Your spot is not available, your options are: " + str(self.spots))
             else:
@@ -326,7 +334,7 @@ def main():
     Driver code
     """
 
-    quarto = Quarto(4)
+    quarto = Quarto(4, main_bin_list=bin_list)
     quarto.play()
 
 
