@@ -1,7 +1,7 @@
 # Stephan McGlashan
 # CS3 quarto
 
-from termcolor import colored, cprint  # Piece colors
+from termcolor import *  # Piece colors
 
 
 def bool_to_bin(attribute_list):
@@ -69,30 +69,31 @@ class Token:  # Piece attributes
 
 class Player:
 
-    def __init__(self, token=None, spot=None):
+    def __init__(self, piece=None, spot=None):
         """
         Initializes the given player's
         token and spot for them to choose.
         """
 
-        self.token = token
+        self.piece = piece
         self.spot = spot
 
-    def pick_piece(self):
+    def pick_piece(self, base_input = None):
         """
         Prompts player to enter their desired piece
-        attributes in numeric form. Passes their input
-        to the Token class which will return an ASCII
-        token string which is then returned.
+        number. Passes their input to the binary conversion
+        function which returns their choice in binary which
+        automatically converts to ASCII. x*2-1 to account
+        for piece_list indexing
         """
 
-        size = int(input("Enter 1 for a tall piece: "))
-        color = int(input("Enter 1 for a blue piece: "))
-        shape = int(input("Enter 1 for a square piece: "))
-        hole = int(input("Enter 1 for a hole piece: "))
-
-        self.token = Token(size, color, shape, hole)
-        return self.token
+        if base_input is None:
+            base_input = int(input("Enter the piece number: "))
+        else:
+            pass
+        self.piece = (base_input*2)-1
+        print(self.piece)
+        return self.piece
 
     def play_piece(self):
         """
@@ -116,6 +117,8 @@ class Quarto:  # Main game
         """
         self.player = Player()
         self.dim = dim
+        self.bin_list = [1, "0000", 1, "1000", 1, "0001", 1, "1001", 1, "0010", 1, "1010", 1, "0011", 1, "1011",
+                         1, "0100", 1, "1100", 1, "0101", 1, "1101", 1, "0110", 1, "1110", 1, "0111", 1, "1111"]
         self.board = [[" "] * dim for _ in range(dim)]
         self.spots = [[j, i] for i in range(dim) for j in range(dim)]  # Generates lists of possible spots on board
 
@@ -136,8 +139,6 @@ class Quarto:  # Main game
         horizontal_rule = ("---" * self.dim + "-" * (self.dim - 1) + "\n")  # Creates horizontal bars on board
         return horizontal_rule.join(rows)
 
-
-
     def groupcheck(self):
         """
         Checks to see if four pieces exist in
@@ -156,8 +157,7 @@ class Quarto:  # Main game
         master_list = [rowlist, columnlist, Mdiagonallist, mdiagonallist]
         return master_list
 
-    @staticmethod
-    def piece_list(piece_number):
+    def piece_list(self, piece_number):
         """
         Stores game pieces and log of which are
         availible to play in binary list. List is
@@ -169,12 +169,12 @@ class Quarto:  # Main game
         to pick another piece from the remaining pieces.
         """
 
-        bin_list = [bin(index).replace('0b', '') for index in range(16)]  # Generates list of binary indices
-        if bin_list[piece_number] not in bin_list:
+        if self.bin_list[piece_number] not in self.bin_list:
             return "Your piece is unavailable\nAvailable pieces are: " + str(bin_list)
         else:
-            bin_list.remove(piece_number)  # Removes played / given piece
-            return bin_list[piece_number]
+            piece = self.bin_list[piece_number]  # THIS IS THE OUTPUT PROBLEM
+            self.bin_list.pop(piece_number)  # Removes played / given piece
+            return piece
 
     def updateboard(self, token, usercoords, spots):
         """
@@ -271,17 +271,37 @@ class Quarto:  # Main game
         piece meets the win conditions.
         """
 
+        piece_list = ["1:", colored("●", "red"), "2:", colored("●", "red", attrs=["underline"]),
+                      "3:", colored("◉", "red"), "4:", colored("◉", "red", attrs=["underline"]),
+                      "5:", colored("■", "red"), "6:", colored("■", "red", attrs=["underline"]),
+                      "7:", colored("◙", "red"), "8:", colored("◙", "red", attrs=["underline"]),
+                      "9:", colored("●", "blue"), "10:", colored("●", "blue", attrs=["underline"]),
+                      "11:", colored("◉", "blue"), "12:", colored("◉", "blue", attrs=["underline"]),
+                      "13:", colored("■", "blue"), "14:", colored("■", "blue", attrs=["underline"]),
+                      "15:", colored("◙", "blue"), "16:",  colored("◙", "blue", attrs=["underline"])]
+
         playernum = 2  # Arbitrary vars for functionality
+
         turn = 0
         player1_moves = []
         player2_moves = []
         while not (self.winner()):  # Main game loop
-            print("Player", str(playernum), ", choose the next piece to be played:\n")
-            token = self.player.pick_piece()
+            print("Player", str(playernum), ", choose the next piece to be played.")
+            print("Available pieces:")
+            for term in range(len(piece_list)):
+                if term % 2 == 0:
+                    print(piece_list[term])
+                else:
+                    cprint(piece_list[term])
+            piece_number = self.player.pick_piece()
+            token = self.piece_list(piece_number)
 
             playernum = str((turn % 2) + 1)  # Changes active player number
 
-            print("Player", str(playernum), ", where would you like to play your piece?\n")
+            print("Player", str(playernum), ", your piece is: ")
+            cprint(piece_list[piece_number])
+            print("Where would you like to play your piece?\n")
+
             usercoords = self.player.play_piece()
 
             if not self.legality(usercoords, self.spots):  # If input is illegal, turn not counted and player helped
